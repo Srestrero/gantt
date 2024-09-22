@@ -12,22 +12,10 @@ export default class Arrow {
 
     calculate_path() {
         let start_x =
-            this.from_task.$bar.getX() + this.from_task.$bar.getWidth() / 2;
-
-        const condition = () =>
-            this.to_task.$bar.getX() < start_x + this.gantt.options.padding &&
-            start_x > this.from_task.$bar.getX() + this.gantt.options.padding;
-
-        while (condition()) {
-            start_x -= 10;
-        }
+            this.from_task.$bar.getX() + this.from_task.$bar.getWidth();
 
         const start_y =
-            this.gantt.options.header_height +
-            this.gantt.options.bar_height +
-            (this.gantt.options.padding + this.gantt.options.bar_height) *
-                this.from_task.task._index +
-            this.gantt.options.padding;
+            this.from_task.$bar.getY() + this.gantt.options.bar_height/2
 
         const end_x =
             this.to_task.$bar.getX() - this.gantt.options.padding / 2 - 7;
@@ -49,6 +37,8 @@ export default class Arrow {
 
         this.path = `
             M ${start_x} ${start_y}
+            L ${start_x + 10} ${start_y}
+            a ${curve} ${curve} 0 0 ${1} ${curve} ${curve_y}
             V ${offset}
             a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
             L ${end_x} ${end_y}
@@ -57,8 +47,9 @@ export default class Arrow {
             l -5 5`;
 
         if (
-            this.to_task.$bar.getX() <
-            this.from_task.$bar.getX() + this.gantt.options.padding
+            // this.to_task.$bar.getX() <
+            // this.from_task.$bar.getX() + this.gantt.options.padding
+            start_x > end_x
         ) {
             const down_1 = this.gantt.options.padding / 2 - curve;
             const down_2 =
@@ -69,9 +60,11 @@ export default class Arrow {
 
             this.path = `
                 M ${start_x} ${start_y}
-                v ${down_1}
+                L ${start_x + 10} ${start_y}
+                a ${curve} ${curve} 0 0 ${1} ${curve} ${curve_y}
+                v ${this.gantt.options.bar_height/2}
                 a ${curve} ${curve} 0 0 1 -${curve} ${curve}
-                H ${left}
+                H ${left-10}
                 a ${curve} ${curve} 0 0 ${clockwise} -${curve} ${curve_y}
                 V ${down_2}
                 a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}

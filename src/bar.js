@@ -31,8 +31,8 @@ export default class Bar {
         this.width = this.gantt.options.column_width * this.duration;
         this.progress_width =
             this.gantt.options.column_width *
-                this.duration *
-                (this.task.progress / 100) || 0;
+            this.duration *
+            (this.task.progress / 100) || 0;
         this.group = createSVG('g', {
             class:
                 'bar-wrapper' +
@@ -72,8 +72,8 @@ export default class Bar {
         this.compute_expected_progress();
         this.expected_progress_width =
             this.gantt.options.column_width *
-                this.duration *
-                (this.expected_progress / 100) || 0;
+            this.duration *
+            (this.expected_progress / 100) || 0;
     }
 
     draw() {
@@ -102,14 +102,16 @@ export default class Bar {
             class:
                 'bar' +
                 (/^((?!chrome|android).)*safari/i.test(navigator.userAgent) &&
-                !this.task.important
+                    !this.task.important
                     ? ' safari'
                     : ''),
             append_to: this.bar_group,
         });
-
         animateSVG(this.$bar, 'width', 0, this.width);
-
+        let element= this.$bar;
+        element.addEventListener("click", function(){
+            console.log("hiciste click sobre una barra");
+        })
         if (this.invalid) {
             this.$bar.classList.add('bar-invalid');
         }
@@ -287,12 +289,12 @@ export default class Bar {
             this.group,
             'mouseenter',
             (e) =>
-                (timeout = setTimeout(() => {
-                    this.show_popup(e.offsetX || e.layerX);
-                    document.getElementById(
-                        `${task_id}-highlight`,
-                    ).style.display = 'block';
-                }, 200)),
+            (timeout = setTimeout(() => {
+                this.show_popup(e.offsetX || e.layerX);
+                document.getElementById(
+                    `${task_id}-highlight`,
+                ).style.display = 'block';
+            }, 200)),
         );
 
         $.on(this.group, 'mouseleave', () => {
@@ -307,6 +309,7 @@ export default class Bar {
         });
 
         $.on(this.group, 'dblclick', (e) => {
+            this.gantt.trigger_event('double_click', [this.task]);
             if (this.action_completed) {
                 // just finished a move action, wait for a few seconds
                 return;
@@ -315,7 +318,6 @@ export default class Bar {
             if (this.gantt.popup)
                 this.gantt.popup.parent.classList.remove('hidden');
 
-            this.gantt.trigger_event('double_click', [this.task]);
         });
     }
 
@@ -567,8 +569,8 @@ export default class Bar {
         this.$expected_bar_progress.setAttribute(
             'width',
             this.gantt.options.column_width *
-                this.duration *
-                (this.expected_progress / 100) || 0,
+            this.duration *
+            (this.expected_progress / 100) || 0,
         );
     }
 

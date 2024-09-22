@@ -6,7 +6,7 @@
     "type": "module",
     "scripts": {
         "start": "yarn run dev",
-        "dev": "vite",
+        "dev": "vite build && vite",
         "build-dev": "vite build --watch",
         "build": "vite build",
         "test": "jest",
@@ -26,8 +26,8 @@
     ],
     "exports": {
         ".": {
-            "import": "./dist/frappe-gantt.es.js",
-            "require": "./dist/frappe-gantt.umd.js"
+            "import": "./dist/frappe-gantt.js",
+            "require": "./dist/frappe-gantt.umd.cjs"
         }
     },
     "keywords": [

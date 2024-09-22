@@ -1,4 +1,4 @@
-const M = "year", D = "month", $ = "day", E = "hour", Y = "minute", A = "second", L = "millisecond", S = {
+const k = "year", D = "month", $ = "day", E = "hour", Y = "minute", A = "second", L = "millisecond", S = {
   January: "Jan",
   February: "Feb",
   March: "Mar",
@@ -11,7 +11,7 @@ const M = "year", D = "month", $ = "day", E = "hour", Y = "minute", A = "second"
   October: "Oct",
   November: "Nov",
   December: "Dec"
-}, h = {
+}, a = {
   parse_duration(n) {
     const e = /([0-9]+)(y|m|d|h|min|s|ms)/gm.exec(n);
     if (console.log(e), e !== null) {
@@ -37,7 +37,7 @@ const M = "year", D = "month", $ = "day", E = "hour", Y = "minute", A = "second"
     if (typeof n == "string") {
       let s, i;
       const r = n.split(" ");
-      s = r[0].split(t).map((a) => parseInt(a, 10)), i = r[1] && r[1].split(e), s[1] = s[1] ? s[1] - 1 : 0;
+      s = r[0].split(t).map((h) => parseInt(h, 10)), i = r[1] && r[1].split(e), s[1] = s[1] ? s[1] - 1 : 0;
       let o = s;
       return i && i.length && (i.length === 4 && (i[3] = "0." + i[3], i[3] = parseFloat(i[3]) * 1e3), o = o.concat(i)), new Date(...o);
     }
@@ -51,7 +51,7 @@ const M = "year", D = "month", $ = "day", E = "hour", Y = "minute", A = "second"
   format(n, t = "YYYY-MM-DD HH:mm:ss.SSS", e = "en") {
     const i = new Intl.DateTimeFormat(e, {
       month: "long"
-    }).format(n), r = i.charAt(0).toUpperCase() + i.slice(1), o = this.get_date_values(n).map((g) => v(g, 2, 0)), a = {
+    }).format(n), r = i.charAt(0).toUpperCase() + i.slice(1), o = this.get_date_values(n).map((g) => v(g, 2, 0)), h = {
       YYYY: o[0],
       MM: v(+o[1] + 1, 2, 0),
       DD: o[2],
@@ -65,21 +65,21 @@ const M = "year", D = "month", $ = "day", E = "hour", Y = "minute", A = "second"
     };
     let d = t;
     const p = [];
-    return Object.keys(a).sort((g, u) => u.length - g.length).forEach((g) => {
-      d.includes(g) && (d = d.replaceAll(g, `$${p.length}`), p.push(a[g]));
+    return Object.keys(h).sort((g, u) => u.length - g.length).forEach((g) => {
+      d.includes(g) && (d = d.replaceAll(g, `$${p.length}`), p.push(h[g]));
     }), p.forEach((g, u) => {
       d = d.replaceAll(`$${u}`, g);
     }), d;
   },
   diff(n, t, e = $) {
-    let s, i, r, o, a, d, p;
-    return s = n - t, i = s / 1e3, o = i / 60, r = o / 60, a = r / 24, d = a / 30, p = d / 12, e.endsWith("s") || (e += "s"), Math.floor(
+    let s, i, r, o, h, d, p;
+    return s = n - t, i = s / 1e3, o = i / 60, r = o / 60, h = r / 24, d = h / 30, p = d / 12, e.endsWith("s") || (e += "s"), Math.floor(
       {
         milliseconds: s,
         seconds: i,
         minutes: o,
         hours: r,
-        days: a,
+        days: h,
         months: d,
         years: p
       }[e]
@@ -95,7 +95,7 @@ const M = "year", D = "month", $ = "day", E = "hour", Y = "minute", A = "second"
   add(n, t, e) {
     t = parseInt(t, 10);
     const s = [
-      n.getFullYear() + (e === M ? t : 0),
+      n.getFullYear() + (e === k ? t : 0),
       n.getMonth() + (e === D ? t : 0),
       n.getDate() + (e === $ ? t : 0),
       n.getHours() + (e === E ? t : 0),
@@ -107,7 +107,7 @@ const M = "year", D = "month", $ = "day", E = "hour", Y = "minute", A = "second"
   },
   start_of(n, t) {
     const e = {
-      [M]: 6,
+      [k]: 6,
       [D]: 5,
       [$]: 4,
       [E]: 3,
@@ -121,7 +121,7 @@ const M = "year", D = "month", $ = "day", E = "hour", Y = "minute", A = "second"
     }
     const i = [
       n.getFullYear(),
-      s(M) ? 0 : n.getMonth(),
+      s(k) ? 0 : n.getMonth(),
       s(D) ? 1 : n.getDate(),
       s($) ? 0 : n.getHours(),
       s(E) ? 0 : n.getMinutes(),
@@ -182,7 +182,7 @@ function W(n, t, e, s, i = "0.4s", r = "0.1s") {
       begin: "click + " + r
       // artificial click
     }), n;
-  const a = c("animate", {
+  const h = c("animate", {
     attributeName: t,
     from: e,
     to: s,
@@ -193,7 +193,7 @@ function W(n, t, e, s, i = "0.4s", r = "0.1s") {
     keyTimes: "0; 1",
     keySplines: X("ease-out")
   });
-  return n.appendChild(a), n;
+  return n.appendChild(h), n;
 }
 function X(n) {
   return {
@@ -283,7 +283,9 @@ class O {
       ry: this.corner_radius,
       class: "bar" + (/^((?!chrome|android).)*safari/i.test(navigator.userAgent) && !this.task.important ? " safari" : ""),
       append_to: this.bar_group
-    }), H(this.$bar, "width", 0, this.width), this.invalid && this.$bar.classList.add("bar-invalid");
+    }), H(this.$bar, "width", 0, this.width), this.$bar.addEventListener("click", function() {
+      console.log("hiciste click sobre una barra");
+    }), this.invalid && this.$bar.classList.add("bar-invalid");
   }
   draw_expected_progress_bar() {
     this.invalid || (this.$expected_bar_progress = c("rect", {
@@ -303,7 +305,8 @@ class O {
     ));
   }
   draw_progress_bar() {
-    if (this.invalid) return;
+    if (this.invalid)
+      return;
     this.$bar_progress = c("rect", {
       x: this.x,
       y: this.y,
@@ -314,7 +317,7 @@ class O {
       class: "bar-progress",
       append_to: this.bar_group
     });
-    const t = h.diff(this.task._start, this.gantt.gantt_start, "hour") / this.gantt.options.step * this.gantt.options.column_width;
+    const t = a.diff(this.task._start, this.gantt.gantt_start, "hour") / this.gantt.options.step * this.gantt.options.column_width;
     let e = document.createElement("div");
     e.id = `${this.task.id}-highlight`, e.classList.add("date-highlight"), e.style.height = this.height * 0.8 + "px", e.style.width = this.width + "px", e.style.top = this.gantt.options.header_height - 25 + "px", e.style.left = t + "px", this.$date_highlight = e, this.gantt.$lower_header.prepend(e), H(this.$bar_progress, "width", 0, this.progress_width);
   }
@@ -359,7 +362,8 @@ class O {
     });
   }
   draw_resize_handles() {
-    if (this.invalid || this.gantt.options.readonly) return;
+    if (this.invalid || this.gantt.options.readonly)
+      return;
     const t = this.$bar, e = 8;
     if (this.gantt.options.dates_readonly || (c("rect", {
       x: t.getX() + t.getWidth() + e - 4,
@@ -422,13 +426,14 @@ class O {
     });
   }
   show_popup(t) {
-    if (this.gantt.bar_being_dragged) return;
-    const e = h.format(
+    if (this.gantt.bar_being_dragged)
+      return;
+    const e = a.format(
       this.task._start,
       "MMM D",
       this.gantt.options.language
-    ), s = h.format(
-      h.add(this.task._end, -1, "second"),
+    ), s = a.format(
+      a.add(this.task._end, -1, "second"),
       "MMM D",
       this.gantt.options.language
     ), i = `${e} -  ${s}<br/>Progress: ${this.task.progress}`;
@@ -443,7 +448,7 @@ class O {
   update_bar_position({ x: t = null, width: e = null }) {
     const s = this.$bar;
     if (t) {
-      if (!this.task.dependencies.map((o) => this.gantt.get_bar(o).$bar.getX()).reduce((o, a) => t >= a, t)) {
+      if (!this.task.dependencies.map((o) => this.gantt.get_bar(o).$bar.getX()).reduce((o, h) => t >= h, t)) {
         e = null;
         return;
       }
@@ -453,8 +458,8 @@ class O {
   }
   update_label_position_on_horizontal_scroll({ x: t, sx: e }) {
     const s = document.querySelector(".gantt-container"), i = this.group.querySelector(".bar-label"), r = this.group.querySelector(".bar-img") || "", o = this.bar_group.querySelector(".img_mask") || "";
-    let a = this.$bar.getX() + this.$bar.getWidth(), d = i.getX() + t, p = r && r.getX() + t || 0, g = r && r.getBBox().width + 7 || 7, u = d + i.getBBox().width + 7, f = e + s.clientWidth / 2;
-    i.classList.contains("big") || (u < a && t > 0 && u < f || d - g > this.$bar.getX() && t < 0 && u > f) && (i.setAttribute("x", d), r && (r.setAttribute("x", p), o.setAttribute("x", p)));
+    let h = this.$bar.getX() + this.$bar.getWidth(), d = i.getX() + t, p = r && r.getX() + t || 0, g = r && r.getBBox().width + 7 || 7, u = d + i.getBBox().width + 7, f = e + s.clientWidth / 2;
+    i.classList.contains("big") || (u < h && t > 0 && u < f || d - g > this.$bar.getX() && t < 0 && u > f) && (i.setAttribute("x", d), r && (r.setAttribute("x", p), o.setAttribute("x", p)));
   }
   date_changed() {
     let t = !1;
@@ -462,7 +467,7 @@ class O {
     Number(this.task._start) !== Number(e) && (t = !0, this.task._start = e), Number(this.task._end) !== Number(s) && (t = !0, this.task._end = s), t && this.gantt.trigger_event("date_change", [
       this.task,
       e,
-      h.add(s, -1, "second")
+      a.add(s, -1, "second")
     ]);
   }
   progress_changed() {
@@ -474,18 +479,18 @@ class O {
   }
   compute_start_end_date() {
     const t = this.$bar, e = t.getX() / this.gantt.options.column_width;
-    let s = h.add(
+    let s = a.add(
       this.gantt.gantt_start,
       e * this.gantt.options.step,
       "hour"
     );
     const i = this.gantt.gantt_start.getTimezoneOffset() - s.getTimezoneOffset();
-    i && (s = h.add(
+    i && (s = a.add(
       s,
       i,
       "minute"
     ));
-    const r = t.getWidth() / this.gantt.options.column_width, o = h.add(
+    const r = t.getWidth() / this.gantt.options.column_width, o = a.add(
       s,
       r * this.gantt.options.step,
       "hour"
@@ -497,18 +502,18 @@ class O {
     return parseInt(t, 10);
   }
   compute_expected_progress() {
-    this.expected_progress = h.diff(h.today(), this.task._start, "hour") / this.gantt.options.step, this.expected_progress = (this.expected_progress < this.duration ? this.expected_progress : this.duration) * 100 / this.duration;
+    this.expected_progress = a.diff(a.today(), this.task._start, "hour") / this.gantt.options.step, this.expected_progress = (this.expected_progress < this.duration ? this.expected_progress : this.duration) * 100 / this.duration;
   }
   compute_x() {
     const { step: t, column_width: e } = this.gantt.options, s = this.task._start, i = this.gantt.gantt_start;
-    let o = h.diff(s, i, "hour") / t * e;
-    this.gantt.view_is("Month") && (o = h.diff(s, i, "day") * e / 30), this.x = o;
+    let o = a.diff(s, i, "hour") / t * e;
+    this.gantt.view_is("Month") && (o = a.diff(s, i, "day") * e / 30), this.x = o;
   }
   compute_y() {
     this.y = this.gantt.options.header_height + this.gantt.options.padding + this.task._index * (this.height + this.gantt.options.padding);
   }
   compute_duration() {
-    this.duration = h.diff(this.task._end, this.task._start, "hour") / this.gantt.options.step;
+    this.duration = a.diff(this.task._end, this.task._start, "hour") / this.gantt.options.step;
   }
   get_snap_position(t) {
     let e = t, s, i;
@@ -532,8 +537,8 @@ class O {
   update_label_position() {
     const t = this.bar_group.querySelector(".img_mask") || "", e = this.$bar, s = this.group.querySelector(".bar-label"), i = this.group.querySelector(".bar-img");
     let r = 5, o = this.image_size + 10;
-    const a = s.getBBox().width, d = e.getWidth();
-    a > d ? (s.classList.add("big"), i ? (i.setAttribute("x", e.getX() + e.getWidth() + r), t.setAttribute(
+    const h = s.getBBox().width, d = e.getWidth();
+    h > d ? (s.classList.add("big"), i ? (i.setAttribute("x", e.getX() + e.getWidth() + r), t.setAttribute(
       "x",
       e.getX() + e.getWidth() + r
     ), s.setAttribute(
@@ -544,11 +549,12 @@ class O {
       e.getX() + d / 2 + o
     )) : s.setAttribute(
       "x",
-      e.getX() + d / 2 - a / 2
+      e.getX() + d / 2 - h / 2
     ));
   }
   update_handle_position() {
-    if (this.invalid || this.gantt.options.readonly) return;
+    if (this.invalid || this.gantt.options.readonly)
+      return;
     const t = this.$bar;
     this.handle_group.querySelector(".handle.left").setAttribute("x", t.getX() - 12), this.handle_group.querySelector(".handle.right").setAttribute("x", t.getEndX() + 4);
     const e = this.group.querySelector(".handle.progress");
@@ -565,29 +571,33 @@ class C {
     this.gantt = t, this.from_task = e, this.to_task = s, this.calculate_path(), this.draw();
   }
   calculate_path() {
-    let t = this.from_task.$bar.getX() + this.from_task.$bar.getWidth() / 2;
-    const e = () => this.to_task.$bar.getX() < t + this.gantt.options.padding && t > this.from_task.$bar.getX() + this.gantt.options.padding;
-    for (; e(); )
-      t -= 10;
-    const s = this.gantt.options.header_height + this.gantt.options.bar_height + (this.gantt.options.padding + this.gantt.options.bar_height) * this.from_task.task._index + this.gantt.options.padding, i = this.to_task.$bar.getX() - this.gantt.options.padding / 2 - 7, r = this.gantt.options.header_height + this.gantt.options.bar_height / 2 + (this.gantt.options.padding + this.gantt.options.bar_height) * this.to_task.task._index + this.gantt.options.padding, o = this.from_task.task._index > this.to_task.task._index, a = this.gantt.options.arrow_curve, d = o ? 1 : 0, p = o ? -a : a, g = o ? r + this.gantt.options.arrow_curve : r - this.gantt.options.arrow_curve;
+    let t = this.from_task.$bar.getX() + this.from_task.$bar.getWidth();
+    const e = this.from_task.$bar.getY() + this.gantt.options.bar_height / 2, s = this.to_task.$bar.getX() - this.gantt.options.padding / 2 - 7, i = this.gantt.options.header_height + this.gantt.options.bar_height / 2 + (this.gantt.options.padding + this.gantt.options.bar_height) * this.to_task.task._index + this.gantt.options.padding, r = this.from_task.task._index > this.to_task.task._index, o = this.gantt.options.arrow_curve, h = r ? 1 : 0, d = r ? -o : o, p = r ? i + this.gantt.options.arrow_curve : i - this.gantt.options.arrow_curve;
     if (this.path = `
-            M ${t} ${s}
-            V ${g}
-            a ${a} ${a} 0 0 ${d} ${a} ${p}
-            L ${i} ${r}
+            M ${t} ${e}
+            L ${t + 10} ${e}
+            a ${o} ${o} 0 0 1 ${o} ${d}
+            V ${p}
+            a ${o} ${o} 0 0 ${h} ${o} ${d}
+            L ${s} ${i}
             m -5 -5
             l 5 5
-            l -5 5`, this.to_task.$bar.getX() < this.from_task.$bar.getX() + this.gantt.options.padding) {
-      const u = this.gantt.options.padding / 2 - a, f = this.to_task.$bar.getY() + this.to_task.$bar.getHeight() / 2 - p, w = this.to_task.$bar.getX() - this.gantt.options.padding;
+            l -5 5`, // this.to_task.$bar.getX() <
+    // this.from_task.$bar.getX() + this.gantt.options.padding
+    t > s) {
+      this.gantt.options.padding / 2 - o;
+      const g = this.to_task.$bar.getY() + this.to_task.$bar.getHeight() / 2 - d, u = this.to_task.$bar.getX() - this.gantt.options.padding;
       this.path = `
-                M ${t} ${s}
-                v ${u}
-                a ${a} ${a} 0 0 1 -${a} ${a}
-                H ${w}
-                a ${a} ${a} 0 0 ${d} -${a} ${p}
-                V ${f}
-                a ${a} ${a} 0 0 ${d} ${a} ${p}
-                L ${i} ${r}
+                M ${t} ${e}
+                L ${t + 10} ${e}
+                a ${o} ${o} 0 0 1 ${o} ${d}
+                v ${this.gantt.options.bar_height / 2}
+                a ${o} ${o} 0 0 1 -${o} ${o}
+                H ${u - 10}
+                a ${o} ${o} 0 0 ${h} -${o} ${d}
+                V ${g}
+                a ${o} ${o} 0 0 ${h} ${o} ${d}
+                L ${s} ${i}
                 m -5 -5
                 l 5 5
                 l -5 5`;
@@ -700,20 +710,20 @@ class B {
   }
   setup_tasks(t) {
     this.tasks = t.map((e, s) => {
-      if (e._start = h.parse(e.start), e.end === void 0 && e.duration !== void 0 && (e.end = e._start, e.duration.split(" ").forEach((a) => {
-        let { duration: d, scale: p } = h.parse_duration(a);
-        e.end = h.add(e.end, d, p);
-      })), e._end = h.parse(e.end), h.diff(e._end, e._start, "year") < 0)
+      if (e._start = a.parse(e.start), e.end === void 0 && e.duration !== void 0 && (e.end = e._start, e.duration.split(" ").forEach((h) => {
+        let { duration: d, scale: p } = a.parse_duration(h);
+        e.end = a.add(e.end, d, p);
+      })), e._end = a.parse(e.end), a.diff(e._end, e._start, "year") < 0)
         throw Error(
           "start of task can't be after end of task: in task #, " + (s + 1)
         );
-      if (h.diff(e._end, e._start, "year") > 10 && (e.end = null), e._index = s, !e.start && !e.end) {
-        const o = h.today();
-        e._start = o, e._end = h.add(o, 2, "day");
+      if (a.diff(e._end, e._start, "year") > 10 && (e.end = null), e._index = s, !e.start && !e.end) {
+        const o = a.today();
+        e._start = o, e._end = a.add(o, 2, "day");
       }
-      if (!e.start && e.end && (e._start = h.add(e._end, -2, "day")), e.start && !e.end && (e._end = h.add(e._start, 2, "day")), h.get_date_values(e._end).slice(3).every((o) => o === 0) && (e._end = h.add(e._end, 24, "hour")), (!e.start || !e.end) && (e.invalid = !0), typeof e.dependencies == "string" || !e.dependencies) {
+      if (!e.start && e.end && (e._start = a.add(e._end, -2, "day")), e.start && !e.end && (e._end = a.add(e._start, 2, "day")), a.get_date_values(e._end).slice(3).every((o) => o === 0) && (e._end = a.add(e._end, 24, "hour")), (!e.start || !e.end) && (e.invalid = !0), typeof e.dependencies == "string" || !e.dependencies) {
         let o = [];
-        e.dependencies && (o = e.dependencies.split(",").map((a) => a.trim().replaceAll(" ", "_")).filter((a) => a)), e.dependencies = o;
+        e.dependencies && (o = e.dependencies.split(",").map((h) => h.trim().replaceAll(" ", "_")).filter((h) => h)), e.dependencies = o;
       }
       return e.id ? typeof e.id == "string" ? e.id = e.id.replaceAll(" ", "_") : e.id = `${e.id}` : e.id = z(e), e;
     }), this.setup_dependencies();
@@ -738,23 +748,23 @@ class B {
   }
   setup_gantt_dates() {
     this.gantt_start = this.gantt_end = null;
-    for (let a of this.tasks)
-      (!this.gantt_start || a._start < this.gantt_start) && (this.gantt_start = a._start), (!this.gantt_end || a._end > this.gantt_end) && (this.gantt_end = a._end);
+    for (let h of this.tasks)
+      (!this.gantt_start || h._start < this.gantt_start) && (this.gantt_start = h._start), (!this.gantt_end || h._end > this.gantt_end) && (this.gantt_end = h._end);
     let t, e;
-    this.gantt_start ? t = h.start_of(this.gantt_start, "day") : t = /* @__PURE__ */ new Date(), this.gantt_end ? e = h.start_of(this.gantt_end, "day") : e = /* @__PURE__ */ new Date();
+    this.gantt_start ? t = a.start_of(this.gantt_start, "day") : t = /* @__PURE__ */ new Date(), this.gantt_end ? e = a.start_of(this.gantt_end, "day") : e = /* @__PURE__ */ new Date();
     let s;
-    for (let [a, d] of Object.entries(l))
-      d === this.options.view_mode && (s = a);
-    const [i, r] = this.options.view_mode_padding[s].map(h.parse_duration);
-    t = h.add(
+    for (let [h, d] of Object.entries(l))
+      d === this.options.view_mode && (s = h);
+    const [i, r] = this.options.view_mode_padding[s].map(a.parse_duration);
+    t = a.add(
       t,
       -i.duration,
       i.scale
     );
     let o;
-    this.view_is(l.YEAR) ? o = "YYYY" : this.view_is(l.MONTH) ? o = "YYYY-MM" : this.view_is(l.DAY) ? o = "YYYY-MM-DD" : o = "YYYY-MM-DD HH", this.gantt_start = h.parse(
-      h.format(t, o)
-    ), this.gantt_start.setHours(0, 0, 0, 0), this.gantt_end = h.add(
+    this.view_is(l.YEAR) ? o = "YYYY" : this.view_is(l.MONTH) ? o = "YYYY-MM" : this.view_is(l.DAY) ? o = "YYYY-MM-DD" : o = "YYYY-MM-DD HH", this.gantt_start = a.parse(
+      a.format(t, o)
+    ), this.gantt_start.setHours(0, 0, 0, 0), this.gantt_end = a.add(
       e,
       r.duration,
       r.scale
@@ -764,11 +774,11 @@ class B {
     this.dates = [];
     let t = null;
     for (; t === null || t < this.gantt_end; )
-      t ? this.view_is(l.YEAR) ? t = h.add(t, 1, "year") : this.view_is(l.MONTH) ? t = h.add(t, 1, "month") : t = h.add(
+      t ? this.view_is(l.YEAR) ? t = a.add(t, 1, "year") : this.view_is(l.MONTH) ? t = a.add(t, 1, "month") : t = a.add(
         t,
         this.options.step,
         "hour"
-      ) : t = h.clone(this.gantt_start), this.dates.push(t);
+      ) : t = a.clone(this.gantt_start), this.dates.push(t);
   }
   bind_events() {
     this.options.readonly || (this.bind_grid_click(), this.bind_bar_events());
@@ -872,17 +882,17 @@ class B {
       class: "lines_layer",
       append_to: this.layers.grid
     }), r = this.options.header_height + this.options.padding / 2;
-    const o = this.dates.length * this.options.column_width, a = this.options.bar_height + this.options.padding;
+    const o = this.dates.length * this.options.column_width, h = this.options.bar_height + this.options.padding;
     if (this.options.lines !== "vertical")
       for (let d of this.tasks)
         c("line", {
           x1: 0,
-          y1: r + a,
+          y1: r + h,
           x2: o,
-          y2: r + a,
+          y2: r + h,
           class: "row-line",
           append_to: i
-        }), r += a;
+        }), r += h;
     if (this.options.lines !== "horizontal")
       for (let d of this.dates) {
         let p = "tick";
@@ -890,14 +900,14 @@ class B {
           d: `M ${t} ${e} v ${s}`,
           class: p,
           append_to: this.layers.grid
-        }), this.view_is(l.MONTH) ? t += h.get_days_in_month(d) * this.options.column_width / 30 : t += this.options.column_width;
+        }), this.view_is(l.MONTH) ? t += a.get_days_in_month(d) * this.options.column_width / 30 : t += this.options.column_width;
       }
   }
   highlightWeekends() {
     if (!(!this.view_is("Day") && !this.view_is("Half Day"))) {
       for (let t = new Date(this.gantt_start); t <= this.gantt_end; t.setDate(t.getDate() + 1))
         if (t.getDay() === 0 || t.getDay() === 6) {
-          const e = h.diff(t, this.gantt_start, "hour") / this.options.step * this.options.column_width, s = (this.options.bar_height + this.options.padding) * this.tasks.length;
+          const e = a.diff(t, this.gantt_start, "hour") / this.options.step * this.options.column_width, s = (this.options.bar_height + this.options.padding) * this.tasks.length;
           c("rect", {
             x: e,
             y: this.options.header_height + this.options.padding / 2,
@@ -913,9 +923,9 @@ class B {
   computeGridHighlightDimensions(t) {
     let e = this.options.column_width / 2;
     if (this.view_is(l.DAY)) {
-      let s = h.today();
+      let s = a.today();
       return {
-        x: e + h.diff(s, this.gantt_start, "hour") / this.options.step * this.options.column_width,
+        x: e + a.diff(s, this.gantt_start, "hour") / this.options.step * this.options.column_width,
         date: s
       };
     }
@@ -942,7 +952,8 @@ class B {
       const { x: t, date: e } = this.computeGridHighlightDimensions(
         this.options.view_mode
       );
-      if (!this.dates.find((o) => o.getTime() == e.getTime())) return;
+      if (!this.dates.find((o) => o.getTime() == e.getTime()))
+        return;
       const s = this.options.header_height + this.options.padding / 2, i = (this.options.bar_height + this.options.padding) * this.tasks.length;
       this.$current_highlight = this.create_el({
         top: s,
@@ -952,14 +963,14 @@ class B {
         append_to: this.$container
       });
       let r = document.getElementById(
-        h.format(e).replaceAll(" ", "_")
+        a.format(e).replaceAll(" ", "_")
       );
       r && (r.classList.add("current-date-highlight"), r.style.top = +r.style.top.slice(0, -2) - 4 + "px", r.style.left = +r.style.left.slice(0, -2) - 8 + "px");
     }
   }
-  create_el({ left: t, top: e, width: s, height: i, id: r, classes: o, append_to: a }) {
+  create_el({ left: t, top: e, width: s, height: i, id: r, classes: o, append_to: h }) {
     let d = document.createElement("div");
-    return d.classList.add(o), d.style.top = e + "px", d.style.left = t + "px", r && (d.id = r), s && (d.style.width = i + "px"), i && (d.style.height = i + "px"), a.appendChild(d), d;
+    return d.classList.add(o), d.style.top = e + "px", d.style.left = t + "px", r && (d.id = r), s && (d.style.width = i + "px"), i && (d.style.height = i + "px"), h.appendChild(d), d;
   }
   make_dates() {
     this.upper_texts_x = {}, this.get_dates_to_draw().forEach((t, e) => {
@@ -985,41 +996,41 @@ class B {
     });
   }
   get_date_info(t, e) {
-    let s = e ? e.date : h.add(t, 1, "day");
+    let s = e ? e.date : a.add(t, 1, "day");
     const i = {
-      Hour_lower: h.format(t, "HH", this.options.language),
-      "Quarter Day_lower": h.format(
+      Hour_lower: a.format(t, "HH", this.options.language),
+      "Quarter Day_lower": a.format(
         t,
         "HH",
         this.options.language
       ),
-      "Half Day_lower": h.format(
+      "Half Day_lower": a.format(
         t,
         "HH",
         this.options.language
       ),
-      Day_lower: t.getDate() !== s.getDate() ? h.format(t, "D", this.options.language) : "",
-      Week_lower: t.getMonth() !== s.getMonth() ? h.format(t, "D MMM", this.options.language) : h.format(t, "D", this.options.language),
-      Month_lower: h.format(t, "MMMM", this.options.language),
-      Year_lower: h.format(t, "YYYY", this.options.language),
-      Hour_upper: t.getDate() !== s.getDate() ? h.format(t, "D MMMM", this.options.language) : "",
-      "Quarter Day_upper": t.getDate() !== s.getDate() ? h.format(t, "D MMM", this.options.language) : "",
-      "Half Day_upper": t.getDate() !== s.getDate() ? t.getMonth() !== s.getMonth() ? h.format(
+      Day_lower: t.getDate() !== s.getDate() ? a.format(t, "D", this.options.language) : "",
+      Week_lower: t.getMonth() !== s.getMonth() ? a.format(t, "D MMM", this.options.language) : a.format(t, "D", this.options.language),
+      Month_lower: a.format(t, "MMMM", this.options.language),
+      Year_lower: a.format(t, "YYYY", this.options.language),
+      Hour_upper: t.getDate() !== s.getDate() ? a.format(t, "D MMMM", this.options.language) : "",
+      "Quarter Day_upper": t.getDate() !== s.getDate() ? a.format(t, "D MMM", this.options.language) : "",
+      "Half Day_upper": t.getDate() !== s.getDate() ? t.getMonth() !== s.getMonth() ? a.format(
         t,
         "D MMM",
         this.options.language
-      ) : h.format(t, "D", this.options.language) : "",
-      Day_upper: t.getMonth() !== s.getMonth() || !e ? h.format(t, "MMMM", this.options.language) : "",
-      Week_upper: t.getMonth() !== s.getMonth() ? h.format(t, "MMMM", this.options.language) : "",
-      Month_upper: t.getFullYear() !== s.getFullYear() ? h.format(t, "YYYY", this.options.language) : "",
-      Year_upper: t.getFullYear() !== s.getFullYear() ? h.format(t, "YYYY", this.options.language) : ""
+      ) : a.format(t, "D", this.options.language) : "",
+      Day_upper: t.getMonth() !== s.getMonth() || !e ? a.format(t, "MMMM", this.options.language) : "",
+      Week_upper: t.getMonth() !== s.getMonth() ? a.format(t, "MMMM", this.options.language) : "",
+      Month_upper: t.getFullYear() !== s.getFullYear() ? a.format(t, "YYYY", this.options.language) : "",
+      Year_upper: t.getFullYear() !== s.getFullYear() ? a.format(t, "YYYY", this.options.language) : ""
     };
-    let r = this.view_is(l.MONTH) ? h.get_days_in_month(t) * this.options.column_width / 30 : this.options.column_width;
+    let r = this.view_is(l.MONTH) ? a.get_days_in_month(t) * this.options.column_width / 30 : this.options.column_width;
     const o = {
       x: e ? e.base_pos_x + e.column_width : 0,
       lower_y: this.options.header_height - 20,
       upper_y: this.options.header_height - 50
-    }, a = {
+    }, h = {
       Hour_lower: r / 2,
       Hour_upper: r * 12,
       "Quarter Day_lower": r / 2,
@@ -1037,7 +1048,7 @@ class B {
     };
     return {
       date: t,
-      formatted_date: h.format(t).replaceAll(" ", "_"),
+      formatted_date: a.format(t).replaceAll(" ", "_"),
       column_width: r,
       base_pos_x: o.x,
       upper_text: this.options.lower_text ? this.options.upper_text(
@@ -1050,9 +1061,9 @@ class B {
         this.options.view_mode,
         i[`${this.options.view_mode}_lower`]
       ) : i[`${this.options.view_mode}_lower`],
-      upper_x: o.x + a[`${this.options.view_mode}_upper`],
+      upper_x: o.x + h[`${this.options.view_mode}_upper`],
       upper_y: o.upper_y,
-      lower_x: o.x + a[`${this.options.view_mode}_lower`],
+      lower_x: o.x + h[`${this.options.view_mode}_lower`],
       lower_y: o.lower_y
     };
   }
@@ -1068,7 +1079,8 @@ class B {
       let e = [];
       e = t.dependencies.map((s) => {
         const i = this.get_task(s);
-        if (!i) return;
+        if (!i)
+          return;
         const r = new C(
           this,
           this.bars[i._index],
@@ -1094,11 +1106,12 @@ class B {
     else {
       if (t === "today")
         return this.scroll_today();
-      typeof t == "string" && (t = h.parse(t));
+      typeof t == "string" && (t = a.parse(t));
     }
     const e = this.$svg.parentElement;
-    if (!e) return;
-    const i = (h.diff(t, this.gantt_start, "hour") + 24) / this.options.step * this.options.column_width - this.options.column_width;
+    if (!e)
+      return;
+    const i = (a.diff(t, this.gantt_start, "hour") + 24) / this.options.step * this.options.column_width - this.options.column_width;
     e.scrollTo({ left: i, behavior: "smooth" });
   }
   scroll_today() {
@@ -1110,7 +1123,7 @@ class B {
     });
   }
   bind_bar_events() {
-    let t = !1, e = 0, s = 0, i = !1, r = !1, o = null, a = [];
+    let t = !1, e = 0, s = 0, i = !1, r = !1, o = null, h = [];
     this.bar_being_dragged = null;
     function d() {
       return t || i || r;
@@ -1119,10 +1132,10 @@ class B {
       p.target.classList.contains("grid-row") && this.unselect_all();
     }, _.on(this.$svg, "mousedown", ".bar-wrapper, .handle", (p, g) => {
       const u = _.closest(".bar-wrapper", g);
-      a.forEach((w) => w.group.classList.remove("active")), g.classList.contains("left") ? i = !0 : g.classList.contains("right") ? r = !0 : g.classList.contains("bar-wrapper") && (t = !0), u.classList.add("active"), this.popup && this.popup.parent.classList.add("hidden"), this.popup && this.popup.parent.classList.add("hidden"), e = p.offsetX || p.layerX, p.offsetY || p.layerY, o = u.getAttribute("data-id"), a = [
+      h.forEach((w) => w.group.classList.remove("active")), g.classList.contains("left") ? i = !0 : g.classList.contains("right") ? r = !0 : g.classList.contains("bar-wrapper") && (t = !0), u.classList.add("active"), this.popup && this.popup.parent.classList.add("hidden"), this.popup && this.popup.parent.classList.add("hidden"), e = p.offsetX || p.layerX, p.offsetY || p.layerY, o = u.getAttribute("data-id"), h = [
         o,
         ...this.get_all_dependent_tasks(o)
-      ].map((w) => this.get_bar(w)), this.bar_being_dragged = o, a.forEach((w) => {
+      ].map((w) => this.get_bar(w)), this.bar_being_dragged = o, h.forEach((w) => {
         const b = w.$bar;
         b.ox = b.getX(), b.oy = b.getY(), b.owidth = b.getWidth(), b.finaldx = 0;
       });
@@ -1134,8 +1147,8 @@ class B {
       const b = p.currentTarget.scrollLeft / this.options.column_width * this.options.step / 24;
       let y = "D MMM";
       ["Year", "Month"].includes(this.options.view_mode) ? y = "YYYY" : ["Day", "Week"].includes(this.options.view_mode) ? y = "MMMM" : this.view_is("Half Day") ? y = "D" : this.view_is("Hour") && (y = "D MMMM");
-      let T = h.format(
-        h.add(this.gantt_start, b, "day"),
+      let T = a.format(
+        a.add(this.gantt_start, b, "day"),
         y
       );
       const x = Array.from(
@@ -1146,10 +1159,10 @@ class B {
       if (x && !x.classList.contains("current-upper")) {
         const m = document.querySelector(".current-upper");
         m && (m.classList.remove("current-upper"), m.style.left = this.upper_texts_x[m.textContent] + "px", m.style.top = this.options.header_height - 50 + "px"), x.classList.add("current-upper");
-        let k = this.$svg.getBoundingClientRect();
-        x.style.left = k.x + this.$container.scrollLeft + 10 + "px", x.style.top = k.y + this.options.header_height - 50 + "px";
+        let M = this.$svg.getBoundingClientRect();
+        x.style.left = M.x + this.$container.scrollLeft + 10 + "px", x.style.top = M.y + this.options.header_height - 50 + "px";
       }
-      Array.prototype.forEach.call(g, function(m, k) {
+      Array.prototype.forEach.call(g, function(m, M) {
         f.push(m.getAttribute("data-id"));
       }), w && (u = f.map((m) => this.get_bar(m)), this.options.auto_move_label && u.forEach((m) => {
         m.update_label_position_on_horizontal_scroll({
@@ -1158,9 +1171,10 @@ class B {
         });
       })), s = p.currentTarget.scrollLeft;
     }), _.on(this.$svg, "mousemove", (p) => {
-      if (!d()) return;
+      if (!d())
+        return;
       const g = (p.offsetX || p.layerX) - e;
-      a.forEach((u) => {
+      h.forEach((u) => {
         const f = u.$bar;
         f.finaldx = this.get_snap_position(g), this.hide_popup(), i ? o === u.task.id ? u.update_bar_position({
           x: f.ox + f.finaldx,
@@ -1174,23 +1188,24 @@ class B {
     }), document.addEventListener("mouseup", (p) => {
       t = !1, i = !1, r = !1;
     }), _.on(this.$svg, "mouseup", (p) => {
-      this.bar_being_dragged = null, a.forEach((g) => {
+      this.bar_being_dragged = null, h.forEach((g) => {
         g.$bar.finaldx && (g.date_changed(), g.set_action_completed());
       });
     }), this.bind_bar_progress();
   }
   bind_bar_progress() {
     let t = 0, e = null, s = null, i = null, r = null;
-    _.on(this.$svg, "mousedown", ".handle.progress", (o, a) => {
+    _.on(this.$svg, "mousedown", ".handle.progress", (o, h) => {
       e = !0, t = o.offsetX || o.layerX, o.offsetY || o.layerY;
-      const p = _.closest(".bar-wrapper", a).getAttribute("data-id");
+      const p = _.closest(".bar-wrapper", h).getAttribute("data-id");
       s = this.get_bar(p), i = s.$bar_progress, r = s.$bar, i.finaldx = 0, i.owidth = i.getWidth(), i.min_dx = -i.getWidth(), i.max_dx = r.getWidth() - i.getWidth();
     }), _.on(this.$svg, "mousemove", (o) => {
-      if (!e) return;
-      let a = (o.offsetX || o.layerX) - t;
-      a > i.max_dx && (a = i.max_dx), a < i.min_dx && (a = i.min_dx);
+      if (!e)
+        return;
+      let h = (o.offsetX || o.layerX) - t;
+      h > i.max_dx && (h = i.max_dx), h < i.min_dx && (h = i.min_dx);
       const d = s.$handle_progress;
-      _.attr(i, "width", i.owidth + a), _.attr(d, "cx", i.getEndX()), i.finaldx = a;
+      _.attr(i, "width", i.owidth + h), _.attr(d, "cx", i.getEndX()), i.finaldx = h;
     }), _.on(this.$svg, "mouseup", () => {
       e = !1, i && i.finaldx && (i.finaldx = 0, s.progress_changed(), s.set_action_completed(), s = null, i = null, r = null);
     });

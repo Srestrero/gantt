@@ -66,7 +66,7 @@ export default class Gantt {
         // CSS Selector is passed
         if (typeof element === 'string') {
             element = document.querySelector(element);
-        }
+        }        
 
         // get the SVGElement
         if (element instanceof HTMLElement) {
@@ -97,6 +97,7 @@ export default class Gantt {
         this.$container = document.createElement('div');
         this.$container.classList.add('gantt-container');
 
+        // parent element
         const parent_element = this.$svg.parentElement;
         parent_element.appendChild(this.$container);
         this.$container.appendChild(this.$svg);
