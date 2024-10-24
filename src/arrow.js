@@ -15,7 +15,7 @@ export default class Arrow {
             this.from_task.$bar.getX() + this.from_task.$bar.getWidth();
 
         const start_y =
-            this.from_task.$bar.getY() + this.gantt.options.bar_height/2
+            this.from_task.$bar.getY() + this.gantt.options.bar_height / 2
 
         const end_x =
             this.to_task.$bar.getX() - this.gantt.options.padding / 2 - 7;
@@ -23,7 +23,7 @@ export default class Arrow {
             this.gantt.options.header_height +
             this.gantt.options.bar_height / 2 +
             (this.gantt.options.padding + this.gantt.options.bar_height) *
-                this.to_task.task._index +
+            this.to_task.task._index +
             this.gantt.options.padding;
 
         const from_is_below_to =
@@ -35,10 +35,11 @@ export default class Arrow {
             ? end_y + this.gantt.options.arrow_curve
             : end_y - this.gantt.options.arrow_curve;
 
+
         this.path = `
             M ${start_x} ${start_y}
             L ${start_x + 10} ${start_y}
-            a ${curve} ${curve} 0 0 ${1} ${curve} ${curve_y}
+            a ${curve} ${curve} 0 0 ${clockwise ? 0 : 1} ${curve} ${curve_y}
             V ${offset}
             a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}
             L ${end_x} ${end_y}
@@ -61,10 +62,10 @@ export default class Arrow {
             this.path = `
                 M ${start_x} ${start_y}
                 L ${start_x + 10} ${start_y}
-                a ${curve} ${curve} 0 0 ${1} ${curve} ${curve_y}
-                v ${this.gantt.options.bar_height/2}
+                a ${curve} ${curve} 0 0 ${clockwise ? 0 : 1} ${curve} ${curve_y}
+                v ${this.gantt.options.bar_height / 2}
                 a ${curve} ${curve} 0 0 1 -${curve} ${curve}
-                H ${left-10}
+                H ${left - 10}
                 a ${curve} ${curve} 0 0 ${clockwise} -${curve} ${curve_y}
                 V ${down_2}
                 a ${curve} ${curve} 0 0 ${clockwise} ${curve} ${curve_y}

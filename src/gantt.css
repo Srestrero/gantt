@@ -90,7 +90,18 @@
         position: absolute;
         width: fit-content;
         transform: translateX(-50%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
     }
+
+    & .lower-text:hover {
+        background-color: var(--progress);
+        cursor: pointer;
+        border-radius: 5px;
+    }
+
 
     & .upper-text {
         position: absolute;
@@ -137,24 +148,24 @@
         text-overflow: '';
     }
 
-    & .date-highlight {
+    /* & .date-highlight {
         background-color: var(--progress);
         border-radius: 12px;
         position: absolute;
         display: none;
-    }
+    } */
 
-    & .current-highlight {
+    /* & .current-highlight {
         position: absolute;
         background: var(--dark-blue);
         width: 1px;
-    }
+    }  */
 
     & .current-date-highlight {
         background: var(--dark-blue);
         color: var(--text-light);
-        padding: 4px 8px;
-        border-radius: 200px;
+        /* padding: 4px 8px; */
+        border-radius: 5px;
     }
 }
 
