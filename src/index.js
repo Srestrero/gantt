@@ -36,11 +36,11 @@ const DEFAULT_OPTIONS = {
     padding: 18,
     view_mode: 'Day',
     date_format: 'YYYY-MM-DD',
-    show_expected_progress: false,
+    // show_expected_progress: false,
     popup: null,
     language: 'en',
     readonly: false,
-    progress_readonly: false,
+    // progress_readonly: false,
     dates_readonly: false,
     highlight_weekend: true,
     scroll_to: 'start',
@@ -174,7 +174,7 @@ export default class Gantt {
             // e.g: 2018-09-09 becomes 2018-09-09 23:59:59
             const task_end_values = date_utils.get_date_values(task._end);
             if (task_end_values.slice(3).every((d) => d === 0)) {
-                task._end = date_utils.add(task._end, 24, 'hour');
+                task._end = date_utils.add(task._end, 1439, 'minute');
             }
 
             // invalid flag
@@ -197,27 +197,54 @@ export default class Gantt {
             // uids
             if (!task.id) {
                 task.id = generate_id(task);
-            } else if (typeof task.id === 'string') {
-                task.id = task.id.replaceAll(' ', '_');
-            } else {
+            }
+            // else if (typeof task.id === 'string') {
+            //     task.id = task.id.replaceAll(' ', '_');
+            // } 
+            else {
                 task.id = `${task.id}`;
             }
 
+            task.color = task.color;
             return task;
         });
 
         this.setup_dependencies();
+        this.setup_inverse_dependencies();
     }
 
     setup_dependencies() {
         this.dependency_map = {};
         for (let t of this.tasks) {
-            for (let d of t.dependencies) {
-                this.dependency_map[d] = this.dependency_map[d] || [];
-                this.dependency_map[d].push(t.id);
+            for (let [dependencyId, type, lag] of t.dependencies) {
+                if (!this.dependency_map[t.id]) {
+                    this.dependency_map[t.id] = [];
+                }
+                this.dependency_map[t.id].push({
+                    taskId: dependencyId,
+                    type: type,
+                    lag: lag
+                });
             }
         }
     }
+
+    setup_inverse_dependencies() {
+        this.inverse_dependency_map = {};
+        for (let t of this.tasks) {
+            for (let [dependencyId, type, lag] of t.dependencies) {
+                if (!this.inverse_dependency_map[dependencyId]) {
+                    this.inverse_dependency_map[dependencyId] = [];
+                }
+                this.inverse_dependency_map[dependencyId].push({
+                    taskId: t.id,
+                    type: type,
+                    lag: lag
+                });
+            }
+        }
+    }
+
 
     refresh(tasks) {
         this.setup_tasks(tasks);
@@ -364,7 +391,8 @@ export default class Gantt {
 
     setup_layers() {
         this.layers = {};
-        const layers = ['grid', 'arrow', 'progress', 'bar', 'details'];
+        const layers = ['grid', 'arrow', 'bar', 'details'];
+        // const layers = ['grid', 'arrow', 'bar', 'details','progress'];
         // make group layers
         for (let layer of layers) {
             this.layers[layer] = createSVG('g', {
@@ -539,8 +567,9 @@ export default class Gantt {
             this.$side_header.clientWidth +
             'px';
 
-        // Update the left value on page resize
-        this.$today_button.style.left = `${containerRect.left + 20}px`;
+        if (this.$today_button) {
+            this.$today_button.style.left = `${containerRect.left + 20}px`;
+        }
     }
 
     make_grid_ticks() {
@@ -613,12 +642,20 @@ export default class Gantt {
 
     highlightWeekends() {
         if (!this.view_is('Day') && !this.view_is('Half Day')) return;
+
+        const weekDays = this.options.nonWorkingDays.weekDays;
+        const especialDays = this.options.nonWorkingDays.especialDays;
+
         for (
             let d = new Date(this.gantt_start);
             d <= this.gantt_end;
             d.setDate(d.getDate() + 1)
         ) {
-            if (d.getDay() === 0 || d.getDay() === 6) {
+            const isWeekend = weekDays.includes(d.getDay());
+            const isEspecialDay = especialDays.includes(date_utils.formatDateToYMD(d));
+
+            // Si es fin de semana o día especial
+            if (isWeekend || isEspecialDay) {
                 const x =
                     (date_utils.diff(d, this.gantt_start, 'hour') /
                         this.options.step) *
@@ -737,12 +774,12 @@ export default class Gantt {
                 classes: 'lower-text',
                 append_to: this.$lower_header,
             });
-            let options= this.options['on_date_click']
+            let options = this.options['on_date_click']
             $lower_text.addEventListener("click", function chamo() {
                 if (options) {
-                    options.apply(null,[date]);
+                    options.apply(null, [date]);
                 }
-                else{
+                else {
 
                 }
             })
@@ -977,11 +1014,11 @@ export default class Gantt {
 
     bind_bar_events() {
         let is_dragging = false;
+        let is_resizing_left = false;
+        let is_resizing_right = false;
         let x_on_start = 0;
         let x_on_scroll_start = 0;
         let y_on_start = 0;
-        let is_resizing_left = false;
-        let is_resizing_right = false;
         let parent_bar_id = null;
         let bars = []; // instanceof Bar
         this.bar_being_dragged = null;
@@ -1020,7 +1057,6 @@ export default class Gantt {
                 ...this.get_all_dependent_tasks(parent_bar_id),
             ];
             bars = ids.map((id) => this.get_bar(id));
-
             this.bar_being_dragged = parent_bar_id;
 
             bars.forEach((bar) => {
@@ -1104,7 +1140,7 @@ export default class Gantt {
 
             bars.forEach((bar) => {
                 const $bar = bar.$bar;
-                $bar.finaldx = this.get_snap_position(dx);
+                $bar.finaldx = this.get_snap_position(dx,bar);
                 this.hide_popup();
                 if (is_resizing_left) {
                     if (parent_bar_id === bar.task.id) {
@@ -1140,94 +1176,130 @@ export default class Gantt {
         });
 
         $.on(this.$svg, 'mouseup', (e) => {
-            this.bar_being_dragged = null;
             bars.forEach((bar) => {
                 const $bar = bar.$bar;
+                if (bar.task.id == this.bar_being_dragged) {
+                    let days_movement = this.get_days_movement($bar.finaldx);
+                    if (this.inverse_dependency_map[this.bar_being_dragged]) {
+                        this.inverse_dependency_map[this.bar_being_dragged].forEach((dep) => {
+                            dep.lag += days_movement;
+                        });
+                    }
+                }
                 if (!$bar.finaldx) return;
                 bar.date_changed();
                 bar.set_action_completed();
             });
+            this.bar_being_dragged = null;
         });
 
-        this.bind_bar_progress();
+        // this.bind_bar_progress();
     }
 
-    bind_bar_progress() {
-        let x_on_start = 0;
-        let y_on_start = 0;
-        let is_resizing = null;
-        let bar = null;
-        let $bar_progress = null;
-        let $bar = null;
+    // bind_bar_progress() {
+    //     let x_on_start = 0;
+    //     let y_on_start = 0;
+    //     let is_resizing = null;
+    //     let bar = null;
+    //     let $bar_progress = null;
+    //     let $bar = null;
 
-        $.on(this.$svg, 'mousedown', '.handle.progress', (e, handle) => {
-            is_resizing = true;
-            x_on_start = e.offsetX || e.layerX;
-            y_on_start = e.offsetY || e.layerY;
+    //     $.on(this.$svg, 'mousedown', '.handle.progress', (e, handle) => {
+    //         is_resizing = true;
+    //         x_on_start = e.offsetX || e.layerX;
+    //         y_on_start = e.offsetY || e.layerY;
 
-            const $bar_wrapper = $.closest('.bar-wrapper', handle);
-            const id = $bar_wrapper.getAttribute('data-id');
-            bar = this.get_bar(id);
+    //         const $bar_wrapper = $.closest('.bar-wrapper', handle);
+    //         const id = $bar_wrapper.getAttribute('data-id');
+    //         bar = this.get_bar(id);
 
-            $bar_progress = bar.$bar_progress;
-            $bar = bar.$bar;
+    //         $bar_progress = bar.$bar_progress;
+    //         $bar = bar.$bar;
 
-            $bar_progress.finaldx = 0;
-            $bar_progress.owidth = $bar_progress.getWidth();
-            $bar_progress.min_dx = -$bar_progress.getWidth();
-            $bar_progress.max_dx = $bar.getWidth() - $bar_progress.getWidth();
-        });
+    //         $bar_progress.finaldx = 0;
+    //         $bar_progress.owidth = $bar_progress.getWidth();
+    //         $bar_progress.min_dx = -$bar_progress.getWidth();
+    //         $bar_progress.max_dx = $bar.getWidth() - $bar_progress.getWidth();
+    //     });
 
-        $.on(this.$svg, 'mousemove', (e) => {
-            if (!is_resizing) return;
-            let dx = (e.offsetX || e.layerX) - x_on_start;
+    //     $.on(this.$svg, 'mousemove', (e) => {
+    //         if (!is_resizing) return;
+    //         let dx = (e.offsetX || e.layerX) - x_on_start;
 
-            if (dx > $bar_progress.max_dx) {
-                dx = $bar_progress.max_dx;
-            }
-            if (dx < $bar_progress.min_dx) {
-                dx = $bar_progress.min_dx;
-            }
+    //         if (dx > $bar_progress.max_dx) {
+    //             dx = $bar_progress.max_dx;
+    //         }
+    //         if (dx < $bar_progress.min_dx) {
+    //             dx = $bar_progress.min_dx;
+    //         }
 
-            const $handle = bar.$handle_progress;
-            $.attr($bar_progress, 'width', $bar_progress.owidth + dx);
-            $.attr($handle, 'cx', $bar_progress.getEndX());
-            $bar_progress.finaldx = dx;
-        });
+    //         const $handle = bar.$handle_progress;
+    //         $.attr($bar_progress, 'width', $bar_progress.owidth + dx);
+    //         $.attr($handle, 'cx', $bar_progress.getEndX());
+    //         $bar_progress.finaldx = dx;
+    //     });
 
-        $.on(this.$svg, 'mouseup', () => {
-            is_resizing = false;
-            if (!($bar_progress && $bar_progress.finaldx)) return;
+    //     $.on(this.$svg, 'mouseup', () => {
+    //         is_resizing = false;
+    //         if (!($bar_progress && $bar_progress.finaldx)) return;
 
-            $bar_progress.finaldx = 0;
-            bar.progress_changed();
-            bar.set_action_completed();
-            bar = null;
-            $bar_progress = null;
-            $bar = null;
-        });
-    }
+    //         $bar_progress.finaldx = 0;
+    //         bar.progress_changed();
+    //         bar.set_action_completed();
+    //         bar = null;
+    //         $bar_progress = null;
+    //         $bar = null;
+    //     });
+    // }
 
+    // Nueva versión de la función para obtener todas las tareas dependientes
     get_all_dependent_tasks(task_id) {
         let out = [];
         let to_process = [task_id];
         while (to_process.length) {
             const deps = to_process.reduce((acc, curr) => {
-                acc = acc.concat(this.dependency_map[curr]);
+                if (this.dependency_map[curr]) {
+                    acc = acc.concat(this.dependency_map[curr].map(d => d.taskId));
+                }
                 return acc;
             }, []);
 
             out = out.concat(deps);
-            to_process = deps.filter((d) => !to_process.includes(d));
+            to_process = deps.filter((d) => !out.includes(d));
         }
 
         return out.filter(Boolean);
     }
 
-    get_snap_position(dx) {
+    get_snap_position(dx,bar) {
+        // console.log("Gantt chart dates:", this.dates);
+        // console.log("Gantt chart start:", this.gantt_start);
+        // console.log("Gantt chart end:", this.gantt_end);
         let odx = dx,
             rem,
             position;
+
+        // Obtener los días no laborables
+        const weekDays = this.options.nonWorkingDays.weekDays;
+        const especialDays = this.options.nonWorkingDays.especialDays;
+
+        // Función para verificar si un día es no laborable
+        const isNonWorkingDay = (date) => {
+            const isWeekend = weekDays.includes(date.getDay());
+            const isEspecialDay = especialDays.includes(date_utils.formatDateToYMD(date));
+            return isWeekend || isEspecialDay;
+        };
+
+        // Función para obtener el día más cercano que sea laborable
+        const getNearestWorkingDayPosition = (basePosition, increment) => {
+            let tempDate = new Date(this.gantt_start);
+            tempDate.setDate(tempDate.getDate() + (basePosition / this.options.column_width));
+            while (isNonWorkingDay(tempDate)) {
+                tempDate.setDate(tempDate.getDate() + increment);
+                basePosition += increment * this.options.column_width;
+            }
+            return basePosition-bar.$bar.ox;
+        };
 
         if (this.view_is(VIEW_MODE.WEEK)) {
             rem = dx % (this.options.column_width / 7);
@@ -1237,6 +1309,8 @@ export default class Gantt {
                 (rem < this.options.column_width / 14
                     ? 0
                     : this.options.column_width / 7);
+            // position = getNearestWorkingDayPosition(new Date(this.gantt_start), bar.x + position, 1);
+
         } else if (this.view_is(VIEW_MODE.MONTH)) {
             rem = dx % (this.options.column_width / 30);
             position =
@@ -1245,6 +1319,8 @@ export default class Gantt {
                 (rem < this.options.column_width / 60
                     ? 0
                     : this.options.column_width / 30);
+            // position = getNearestWorkingDayPosition(new Date(this.gantt_start), bar.x + position, 1);
+
         } else {
             rem = dx % this.options.column_width;
             position =
@@ -1253,8 +1329,14 @@ export default class Gantt {
                 (rem < this.options.column_width / 2
                     ? 0
                     : this.options.column_width);
+
+            position = getNearestWorkingDayPosition(bar.$bar.ox + position, 1);
         }
+
         return position;
+    }
+    get_days_movement(finaldx) {
+        return finaldx / this.options.column_width;
     }
 
     unselect_all() {

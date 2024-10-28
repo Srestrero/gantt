@@ -176,7 +176,7 @@ export default {
         const vals = [
             date.getFullYear() + (scale === YEAR ? qty : 0),
             date.getMonth() + (scale === MONTH ? qty : 0),
-            date.getDate() + (scale === DAY ? qty : 0),
+            date.getDate() + (scale === DAY ? qty - 1 : 0),
             date.getHours() + (scale === HOUR ? qty : 0),
             date.getMinutes() + (scale === MINUTE ? qty : 0),
             date.getSeconds() + (scale === SECOND ? qty : 0),
@@ -245,6 +245,12 @@ export default {
             return 29;
         }
         return 28;
+    },
+    formatDateToYMD(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // Meses de 0-11
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     },
 };
 
