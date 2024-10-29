@@ -247,7 +247,7 @@ class X {
     this.prepare_values(), this.prepare_helpers();
   }
   prepare_values() {
-    this.invalid = this.task.invalid, this.height = this.gantt.options.bar_height, this.image_size = this.height - 5, this.compute_x(), this.compute_y(), this.compute_duration(), this.corner_radius = this.gantt.options.bar_corner_radius, this.width = this.calculateWidth(this.task._start, this.task._end), this.group = g("g", {
+    this.invalid = this.task.invalid, this.height = this.gantt.options.bar_height, this.image_size = this.height - 5, this.compute_x(), this.compute_y(), this.compute_duration(), this.corner_radius = this.gantt.options.bar_corner_radius, this.width = this.calculateWidth(this.task._start, this.task.workingDays), this.group = g("g", {
       class: "bar-wrapper" + (this.task.custom_class ? " " + this.task.custom_class : "") + (this.task.important ? " important" : ""),
       "data-id": this.task.id
     }), this.bar_group = g("g", {
@@ -265,7 +265,7 @@ class X {
   calculateWidth(t, e) {
     let i = new Date(t), s = e, n = e;
     for (; s > 0; )
-      console.log("current", i), console.log("remainingWorkingDays", s), console.log("isNonWorkingDay", this.isNonWorkingDay(i)), this.isNonWorkingDay(i) ? s-- : n++, s > 0 && i.setDate(i.getDate() + 1);
+      this.isNonWorkingDay(i) ? n++ : s--, s > 0 && i.setDate(i.getDate() + 1);
     return this.gantt.options.column_width * n;
   }
   prepare_helpers() {
@@ -465,20 +465,20 @@ class X {
   }
   update_bar_position({ x: t = null, width: e = null }) {
     const i = this.$bar;
-    t && (this.task.dependencies.map((s) => this.gantt.get_bar(s[0]).$bar.getX()), this.update_attr(i, "x", t)), e && this.update_attr(i, "width", e), this.update_label_position(), this.update_handle_position(), this.update_arrow_position();
+    t && (this.task.dependencies.map((s) => this.gantt.get_bar(s[0]).$bar.getX()), this.date_changed(!1), this.update_attr(i, "width", this.calculateWidth(this.task._start, this.task.workingDays)), this.update_attr(i, "x", t)), e && this.update_attr(i, "width", e), this.update_label_position(), this.update_handle_position(), this.update_arrow_position();
   }
   update_label_position_on_horizontal_scroll({ x: t, sx: e }) {
     const i = document.querySelector(".gantt-container"), s = this.group.querySelector(".bar-label"), n = this.group.querySelector(".bar-img") || "", o = this.bar_group.querySelector(".img_mask") || "";
     let h = this.$bar.getX() + this.$bar.getWidth(), l = s.getX() + t, d = n && n.getX() + t || 0, p = n && n.getBBox().width + 7 || 7, c = l + s.getBBox().width + 7, u = e + i.clientWidth / 2;
     s.classList.contains("big") || (c < h && t > 0 && c < u || l - p > this.$bar.getX() && t < 0 && c > u) && (s.setAttribute("x", l), n && (n.setAttribute("x", d), o.setAttribute("x", d)));
   }
-  date_changed() {
-    let t = !1;
-    const { new_start_date: e, new_end_date: i } = this.compute_start_end_date();
-    Number(this.task._start) !== Number(e) && (t = !0, this.task._start = e), Number(this.task._end) !== Number(i) && (t = !0, this.task._end = i), t && this.gantt.trigger_event("date_change", [
+  date_changed(t = !0) {
+    let e = !1;
+    const { new_start_date: i, new_end_date: s } = this.compute_start_end_date();
+    Number(this.task._start) !== Number(i) && (e = !0, this.task._start = i), Number(this.task._end) !== Number(s) && (e = !0, this.task._end = s), !(!e && t) && this.gantt.trigger_event("date_change", [
       this.task,
-      e,
-      r.add(i, -1, "second")
+      i,
+      r.add(s, -1, "second")
     ]);
   }
   // progress_changed() {

@@ -1021,6 +1021,8 @@ export default class Gantt {
         let y_on_start = 0;
         let parent_bar_id = null;
         let bars = []; // instanceof Bar
+        let parent_bar;
+        let childlren_bars = [];
         this.bar_being_dragged = null;
 
         function action_in_progress() {
@@ -1052,11 +1054,16 @@ export default class Gantt {
             y_on_start = e.offsetY || e.layerY;
 
             parent_bar_id = bar_wrapper.getAttribute('data-id');
-            const ids = [
-                parent_bar_id,
-                ...this.get_all_dependent_tasks(parent_bar_id),
-            ];
-            bars = ids.map((id) => this.get_bar(id));
+            parent_bar = this.get_bar(parent_bar_id);
+            childlren_bars = ids.map(this.get_all_dependent_tasks(parent_bar_id));
+            // const ids = [
+            //     parent_bar_id,
+            //     ...this.get_all_dependent_tasks(parent_bar_id),
+            // ];
+            // parent_bar = this.get_bar(parent_bar_id);
+            // childlren_bars = ids.map(this.get_all_dependent_tasks(parent_bar_id));
+            // bars = ids.map((id) => this.get_bar(id));
+            bars = [parent_bar, ...childlren_bars];
             this.bar_being_dragged = parent_bar_id;
 
             bars.forEach((bar) => {
@@ -1137,7 +1144,7 @@ export default class Gantt {
         $.on(this.$svg, 'mousemove', (e) => {
             if (!action_in_progress()) return;
             const dx = (e.offsetX || e.layerX) - x_on_start;
-
+             
             bars.forEach((bar) => {
                 const $bar = bar.$bar;
                 $bar.finaldx = this.get_snap_position(dx,bar);

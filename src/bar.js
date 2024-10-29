@@ -28,7 +28,7 @@ export default class Bar {
         this.compute_y();
         this.compute_duration();
         this.corner_radius = this.gantt.options.bar_corner_radius;
-        this.width = this.calculateWidth(this.task._start, this.task._end);
+        this.width = this.calculateWidth(this.task._start, this.task.workingDays);
         // this.progress_width =
         //     this.gantt.options.column_width *
         //     this.duration *
@@ -69,11 +69,7 @@ export default class Bar {
 
         // Iterar hasta consumir todos los días hábiles requeridos
         while (remainingWorkingDays > 0) {
-            console.log("current", current);
-            console.log("remainingWorkingDays", remainingWorkingDays);
-            console.log("isNonWorkingDay", this.isNonWorkingDay(current));
-            
-            if (this.isNonWorkingDay(current)) {
+            if (!this.isNonWorkingDay(current)) {
                 remainingWorkingDays--; // Contar solo si es día hábil
             }
             else{
@@ -397,6 +393,8 @@ export default class Bar {
             //     width = null;
             //     return;
             // }
+            this.date_changed(false);
+            this.update_attr(bar,"width",this.calculateWidth(this.task._start, this.task.workingDays));
             this.update_attr(bar, 'x', x);
             // this.$date_highlight.style.left = x + 'px';
         }
@@ -449,7 +447,7 @@ export default class Bar {
         }
     }
 
-    date_changed() {
+    date_changed(trriger_event = true) {
         let changed = false;
         const { new_start_date, new_end_date } = this.compute_start_end_date();
 
@@ -463,7 +461,7 @@ export default class Bar {
             this.task._end = new_end_date;
         }
 
-        if (!changed) return;
+        if (!changed && trriger_event) return;
 
         this.gantt.trigger_event('date_change', [
             this.task,
