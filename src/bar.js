@@ -461,7 +461,8 @@ export default class Bar {
             this.task._end = new_end_date;
         }
 
-        if (!changed && trriger_event) return;
+        console.log("changed", changed, trriger_event);
+        if (!trriger_event) return;
 
         this.gantt.trigger_event('date_change', [
             this.task,

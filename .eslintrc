@@ -1,7 +1,13 @@
 {
-    "extends": ["plugin:prettier/recommended"],
-    "parserOptions": {
-        "ecmaVersion": 6,
-        "sourceType": "module"
-    }
+  "extends": ["eslint:recommended", "plugin:prettier/recommended"],
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module"
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "es6": true
+  }
 }
+

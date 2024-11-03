@@ -49,7 +49,6 @@
                 workingDays: 1,
                 name: 'Redesign website',
                 id: 'Task 0',
-                progress: 30,
                 dependencies: [],
                 color: "#ff0000"
             },
@@ -59,11 +58,9 @@
                 workingDays: 6,
                 name: 'Write new content',
                 id: 'Task 1',
-                progress: 5,
-                important: true,
                 color: "#00ff00",
                 dependencies: [
-                    ['Task 2', 'endToStart', 4]
+                    ['Task 2', 'endToStart', 3,3]
                 ]
             },
             {
@@ -72,7 +69,6 @@
                 workingDays: 5,
                 name: 'Apply new styles',
                 id: 'Task 2',
-                progress: 80,
                 color: "#0000ff",
             },
             {
@@ -181,9 +177,9 @@
             // on_double_click: (task) => {
             //   console.log("Double Click", task);
             // },
-            // on_date_change: (task, start, end) => {
-            //   console.log("Date change", task, start, end);
-            // },
+            on_date_change: (task, start, end) => {
+              console.log("Date change", task, start, end);
+            },
             // on_progress_change: (task, progress) => {
             //   console.log("Progress Change", task, progress);
             // },

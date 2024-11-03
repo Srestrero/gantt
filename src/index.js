@@ -3,109 +3,27 @@ import { $, createSVG } from './svg_utils';
 import Bar from './bar';
 import Arrow from './arrow';
 import Popup from './popup';
+import { setup_wrapper } from './gantt/wrapper';
+import { VIEW_MODE, VIEW_MODE_PADDING, DEFAULT_OPTIONS } from './gantt/consts';
 
 import './gantt.css';
-
-const VIEW_MODE = {
-    HOUR: 'Hour',
-    QUARTER_DAY: 'Quarter Day',
-    HALF_DAY: 'Half Day',
-    DAY: 'Day',
-    WEEK: 'Week',
-    MONTH: 'Month',
-    YEAR: 'Year',
-};
-
-const VIEW_MODE_PADDING = {
-    HOUR: ['7d', '7d'],
-    QUARTER_DAY: ['7d', '7d'],
-    HALF_DAY: ['7d', '7d'],
-    DAY: ['1m', '1m'],
-    WEEK: ['1m', '1m'],
-    MONTH: ['1m', '1m'],
-    YEAR: ['2y', '2y'],
-};
-
-const DEFAULT_OPTIONS = {
-    header_height: 65,
-    column_width: 30,
-    view_modes: [...Object.values(VIEW_MODE)],
-    bar_height: 30,
-    bar_corner_radius: 3,
-    arrow_curve: 5,
-    padding: 18,
-    view_mode: 'Day',
-    date_format: 'YYYY-MM-DD',
-    // show_expected_progress: false,
-    popup: null,
-    language: 'en',
-    readonly: false,
-    // progress_readonly: false,
-    dates_readonly: false,
-    highlight_weekend: true,
-    scroll_to: 'start',
-    lines: 'both',
-    auto_move_label: true,
-    today_button: true,
-    view_mode_select: false,
-};
-
 export default class Gantt {
     constructor(wrapper, tasks, options) {
-        this.setup_wrapper(wrapper);
+        this.setup(wrapper,tasks,options);
+    }
+
+    setup(wrapper,tasks,options){
+        const elements = setup_wrapper(wrapper); 
+        // Asignamos los elementos al contexto de la clase
+        this.$svg = elements.$svg;
+        this.$container = elements.$container;
+        this.$popup_wrapper = elements.$popup_wrapper;
+        
         this.setup_options(options);
         this.setup_tasks(tasks);
         // initialize with default view mode
         this.change_view_mode();
         this.bind_events();
-    }
-
-    setup_wrapper(element) {
-        let svg_element, wrapper_element;
-
-        // CSS Selector is passed
-        if (typeof element === 'string') {
-            element = document.querySelector(element);
-        }
-
-        // get the SVGElement
-        if (element instanceof HTMLElement) {
-            wrapper_element = element;
-            svg_element = element.querySelector('svg');
-        } else if (element instanceof SVGElement) {
-            svg_element = element;
-        } else {
-            throw new TypeError(
-                'Frappe Gantt only supports usage of a string CSS selector,' +
-                " HTML DOM element or SVG DOM element for the 'element' parameter",
-            );
-        }
-
-        // svg element
-        if (!svg_element) {
-            // create it
-            this.$svg = createSVG('svg', {
-                append_to: wrapper_element,
-                class: 'gantt',
-            });
-        } else {
-            this.$svg = svg_element;
-            this.$svg.classList.add('gantt');
-        }
-
-        // wrapper element
-        this.$container = document.createElement('div');
-        this.$container.classList.add('gantt-container');
-
-        // parent element
-        const parent_element = this.$svg.parentElement;
-        parent_element.appendChild(this.$container);
-        this.$container.appendChild(this.$svg);
-
-        // popup wrapper
-        this.$popup_wrapper = document.createElement('div');
-        this.$popup_wrapper.classList.add('popup-wrapper');
-        this.$container.appendChild(this.$popup_wrapper);
     }
 
     setup_options(options) {
@@ -216,14 +134,15 @@ export default class Gantt {
     setup_dependencies() {
         this.dependency_map = {};
         for (let t of this.tasks) {
-            for (let [dependencyId, type, lag] of t.dependencies) {
+            for (let [dependencyId, type, lag, forcedLag] of t.dependencies) {
                 if (!this.dependency_map[t.id]) {
                     this.dependency_map[t.id] = [];
                 }
                 this.dependency_map[t.id].push({
                     taskId: dependencyId,
                     type: type,
-                    lag: lag
+                    lag: lag,
+                    forcedLag: forcedLag
                 });
             }
         }
@@ -232,14 +151,15 @@ export default class Gantt {
     setup_inverse_dependencies() {
         this.inverse_dependency_map = {};
         for (let t of this.tasks) {
-            for (let [dependencyId, type, lag] of t.dependencies) {
+            for (let [dependencyId, type, lag, forcedLag] of t.dependencies) {
                 if (!this.inverse_dependency_map[dependencyId]) {
                     this.inverse_dependency_map[dependencyId] = [];
                 }
                 this.inverse_dependency_map[dependencyId].push({
                     taskId: t.id,
                     type: type,
-                    lag: lag
+                    lag: lag,
+                    forcedLag: forcedLag
                 });
             }
         }
@@ -263,25 +183,25 @@ export default class Gantt {
         this.options.view_mode = view_mode;
         if (view_mode === VIEW_MODE.HOUR) {
             this.options.step = 24 / 24;
-            this.options.column_width = 38;
+            this.options.column_width = 30;
         } else if (view_mode === VIEW_MODE.DAY) {
             this.options.step = 24;
-            this.options.column_width = 38;
+            this.options.column_width = 30;
         } else if (view_mode === VIEW_MODE.HALF_DAY) {
             this.options.step = 24 / 2;
-            this.options.column_width = 38;
+            this.options.column_width = 30;
         } else if (view_mode === VIEW_MODE.QUARTER_DAY) {
             this.options.step = 24 / 4;
-            this.options.column_width = 38;
+            this.options.column_width = 30;
         } else if (view_mode === VIEW_MODE.WEEK) {
             this.options.step = 24 * 7;
-            this.options.column_width = 140;
+            this.options.column_width = 75;
         } else if (view_mode === VIEW_MODE.MONTH) {
             this.options.step = 24 * 30;
-            this.options.column_width = 120;
+            this.options.column_width = 62;
         } else if (view_mode === VIEW_MODE.YEAR) {
             this.options.step = 24 * 365;
-            this.options.column_width = 120;
+            this.options.column_width = 62;
         }
     }
 
@@ -1055,7 +975,7 @@ export default class Gantt {
 
             parent_bar_id = bar_wrapper.getAttribute('data-id');
             parent_bar = this.get_bar(parent_bar_id);
-            childlren_bars = ids.map(this.get_all_dependent_tasks(parent_bar_id));
+            childlren_bars = this.get_all_dependent_tasks(parent_bar_id).map((id) => this.get_bar(id));
             // const ids = [
             //     parent_bar_id,
             //     ...this.get_all_dependent_tasks(parent_bar_id),
@@ -1144,37 +1064,21 @@ export default class Gantt {
         $.on(this.$svg, 'mousemove', (e) => {
             if (!action_in_progress()) return;
             const dx = (e.offsetX || e.layerX) - x_on_start;
-             
-            bars.forEach((bar) => {
-                const $bar = bar.$bar;
-                $bar.finaldx = this.get_snap_position(dx,bar);
-                this.hide_popup();
-                if (is_resizing_left) {
-                    if (parent_bar_id === bar.task.id) {
-                        bar.update_bar_position({
-                            x: $bar.ox + $bar.finaldx,
-                            width: $bar.owidth - $bar.finaldx,
-                        });
-                    } else {
-                        bar.update_bar_position({
-                            x: $bar.ox + $bar.finaldx,
-                        });
-                    }
-                } else if (is_resizing_right) {
-                    if (parent_bar_id === bar.task.id) {
-                        bar.update_bar_position({
-                            width: $bar.owidth + $bar.finaldx,
-                        });
-                    }
-                } else if (
-                    is_dragging &&
-                    !this.options.readonly &&
-                    !this.options.dates_readonly
-                ) {
-                    bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
-                }
+
+            // Primero manejamos la barra padre
+            const parent_movement = this.handle_parent_bar_movement(parent_bar, dx, {
+                is_dragging,
+                is_resizing_left,
+                is_resizing_right
             });
+            console.log("parent_movement", parent_movement);
+            // Si la barra padre se movió exitosamente, actualizamos las barras hijas
+            if (parent_movement.success) {
+                console.log("childlren_bars", childlren_bars);
+                this.handle_children_bars_movement(childlren_bars, dx, parent_movement.movement, parent_bar);
+            }
         });
+
 
         document.addEventListener('mouseup', (e) => {
             is_dragging = false;
@@ -1201,6 +1105,140 @@ export default class Gantt {
         });
 
         // this.bind_bar_progress();
+    }
+    handle_parent_bar_movement(parent_bar, dx, action_state) {
+        if (!parent_bar || !parent_bar.$bar) {
+            return { success: false, movement: 0 };
+        }
+
+        const $bar = parent_bar.$bar;
+        $bar.finaldx = this.get_snap_position(dx, parent_bar);
+        this.hide_popup();
+
+        // Verificar si el movimiento es válido antes de aplicarlo
+        const proposed_movement = $bar.ox + $bar.finaldx;
+        if (!this.is_valid_move(parent_bar, proposed_movement)) {
+            return { success: false, movement: 0 };
+        }
+
+        const { is_dragging, is_resizing_left, is_resizing_right } = action_state;
+
+        if (is_resizing_left) {
+            parent_bar.update_bar_position({
+                x: $bar.ox + $bar.finaldx,
+                width: $bar.owidth - $bar.finaldx,
+            });
+        } else if (is_resizing_right) {
+            parent_bar.update_bar_position({
+                width: $bar.owidth + $bar.finaldx,
+            });
+        } else if (is_dragging && !this.options.readonly && !this.options.dates_readonly) {
+            parent_bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
+        }
+
+        return { success: true, movement: $bar.finaldx };
+    }
+
+    handle_children_bars_movement(children_bars, dx, parent_movement, parent_bar) {
+        children_bars.forEach(bar => {
+            if (!bar || !bar.$bar) return;
+
+            const dependency = this.get_dependency_for_child(bar.task.id, parent_bar.task.id);
+            if (!dependency) return;
+            const { type, lag } = dependency;
+            console.log("dependency", dependency);
+
+            // Calculamos la nueva posición de la barra padre después del movimiento
+            const parent_end_date = this.get_date_from_position(parent_bar.$bar.ox + parent_movement + parent_bar.$bar.getWidth());
+
+            // Calculamos el forced lag real basado en los días no laborables
+            const new_forced_lag = this.calculate_forced_lag(date_utils.add(parent_end_date, -1, "second"), lag);
+            // Actualizamos el forced lag en la dependencia si ha cambiado
+            if (new_forced_lag !== dependency.forcedLag) {
+                dependency.forcedLag = new_forced_lag;
+
+                // También actualizamos el inverse_dependency_map
+                const inverse_dep = this.inverse_dependency_map[parent_bar.task.id]?.find(
+                    dep => dep.taskId === bar.task.id
+                );
+                if (inverse_dep) {
+                    inverse_dep.forcedLag = new_forced_lag;
+                }
+            }
+
+            const $bar = bar.$bar;
+            let adjusted_movement;
+
+            if (type === 'endToStart') {
+                const forced_lag_pixels = new_forced_lag * this.options.column_width;
+                console.log("forced_lag_pixels", forced_lag_pixels);
+                adjusted_movement = parent_movement + (forced_lag_pixels - (lag * this.options.column_width));
+                console.log("adjusted_movement", adjusted_movement);
+            }
+
+            $bar.finaldx = this.get_snap_position(adjusted_movement, bar);
+            console.log("$bar.finaldx", $bar.finaldx);
+            if (!this.options.readonly && !this.options.dates_readonly) {
+                bar.update_bar_position({ x: $bar.ox + $bar.finaldx });
+            }
+        });
+    }
+
+    // Método auxiliar para verificar si un movimiento es válido
+    is_valid_move(bar, proposed_position) {
+        const column_width = this.options.column_width; // Ancho de una columna
+        const min_position = column_width; // La posición mínima ahora es el ancho de una columna
+        const max_position = this.$svg.getBoundingClientRect().width - bar.$bar.getWidth();
+
+        return proposed_position >= min_position && proposed_position <= max_position;
+    }
+    calculate_forced_lag(start_date, initial_lag) {
+        let current_date = new Date(start_date);
+        console.log("current_date", current_date);
+        let forced_lag = initial_lag;
+        console.log("forced_lag", forced_lag);
+        let days_counted = 0;
+        console.log("days_counted", days_counted);
+
+        // Avanzamos el número de días del lag inicial
+        while (days_counted < initial_lag) {
+            current_date.setDate(current_date.getDate() + 1);
+            days_counted++;
+            console.log("days_counted", days_counted);
+            console.log("current_date", current_date);
+        }
+
+        // A partir de aquí, seguimos avanzando días hasta encontrar un día laborable
+        while (this.isNonWorkingDay(current_date)) {
+            current_date.setDate(current_date.getDate() + 1);
+            forced_lag++;
+            console.log("forced_lag", forced_lag);
+            console.log("current_date", current_date);
+        }
+        console.log("forced_lag final", forced_lag);
+        return forced_lag;
+    }
+    // Método para ajustar el movimiento de las barras hijas
+    adjust_child_movement(child_bar, parent_movement) {
+        // Aquí puedes implementar la lógica para ajustar el movimiento
+        // basado en el tipo de dependencia y los lags definidos
+        return parent_movement; // Por ahora retornamos el mismo movimiento
+    }
+    // Función auxiliar para obtener la dependencia específica entre dos tareas
+    get_dependency_for_child(child_id, parent_id) {
+        // Usamos el dependency_map para encontrar la dependencia específica
+        const dependencies = this.dependency_map[parent_id];
+        if (!dependencies) return null;
+
+        return dependencies.find(dep => dep.taskId === child_id);
+    }
+
+    // Función auxiliar para obtener la fecha a partir de una posición en el gráfico
+    get_date_from_position(position) {
+        const days_from_start = Math.floor(position / this.options.column_width);
+        const result_date = new Date(this.gantt_start);
+        result_date.setDate(result_date.getDate() + days_from_start);
+        return result_date;
     }
 
     // bind_bar_progress() {
@@ -1278,7 +1316,14 @@ export default class Gantt {
         return out.filter(Boolean);
     }
 
-    get_snap_position(dx,bar) {
+    // Función para verificar si un día es no laborable
+    isNonWorkingDay(date) {
+        const weekDays = this.options.nonWorkingDays.weekDays;
+        const especialDays = this.options.nonWorkingDays.especialDays;
+        return weekDays.includes(date.getDay()) || especialDays.includes(date_utils.formatDateToYMD(date));
+    }
+
+    get_snap_position(dx, bar) {
         // console.log("Gantt chart dates:", this.dates);
         // console.log("Gantt chart start:", this.gantt_start);
         // console.log("Gantt chart end:", this.gantt_end);
@@ -1286,26 +1331,15 @@ export default class Gantt {
             rem,
             position;
 
-        // Obtener los días no laborables
-        const weekDays = this.options.nonWorkingDays.weekDays;
-        const especialDays = this.options.nonWorkingDays.especialDays;
-
-        // Función para verificar si un día es no laborable
-        const isNonWorkingDay = (date) => {
-            const isWeekend = weekDays.includes(date.getDay());
-            const isEspecialDay = especialDays.includes(date_utils.formatDateToYMD(date));
-            return isWeekend || isEspecialDay;
-        };
-
         // Función para obtener el día más cercano que sea laborable
         const getNearestWorkingDayPosition = (basePosition, increment) => {
             let tempDate = new Date(this.gantt_start);
             tempDate.setDate(tempDate.getDate() + (basePosition / this.options.column_width));
-            while (isNonWorkingDay(tempDate)) {
+            while (this.isNonWorkingDay(tempDate)) {
                 tempDate.setDate(tempDate.getDate() + increment);
                 basePosition += increment * this.options.column_width;
             }
-            return basePosition-bar.$bar.ox;
+            return basePosition - bar.$bar.ox;
         };
 
         if (this.view_is(VIEW_MODE.WEEK)) {
